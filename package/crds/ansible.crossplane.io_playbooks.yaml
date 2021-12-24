@@ -6,37 +6,26 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.6.2
   creationTimestamp: null
-  name: mytypes.sample.template.crossplane.io
+  name: playbooks.ansible.crossplane.io
 spec:
-  group: sample.template.crossplane.io
+  group: ansible.crossplane.io
   names:
     categories:
-    - crossplane
-    - managed
-    - template
-    kind: MyType
-    listKind: MyTypeList
-    plural: mytypes
-    singular: mytype
-  scope: Cluster
+    - ansible
+    kind: Playbook
+    listKind: PlaybookList
+    plural: playbooks
+    singular: playbook
+  scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .status.conditions[?(@.type=='Ready')].status
-      name: READY
-      type: string
-    - jsonPath: .status.conditions[?(@.type=='Synced')].status
-      name: SYNCED
-      type: string
-    - jsonPath: .metadata.annotations.crossplane\.io/external-name
-      name: EXTERNAL-NAME
-      type: string
     - jsonPath: .metadata.creationTimestamp
       name: AGE
       type: date
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: A MyType is an example API type.
+        description: A Playbook of Ansible Configuration.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -51,7 +40,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: A MyTypeSpec defines the desired state of a MyType.
+            description: A PlaybookSpec defines the desired state of a Playbook.
             properties:
               deletionPolicy:
                 default: Delete
@@ -63,12 +52,25 @@ spec:
                 - Delete
                 type: string
               forProvider:
-                description: MyTypeParameters are the configurable fields of a MyType.
+                description: PlaybookParameters are the configurable fields of a Playbook.
                 properties:
-                  configurableField:
+                  module:
+                    description: The configuration of this playbook; i.e. the configuration
+                      containing its playbook.yml file. When the playbook's ProviderCredentialssource
+                      is 'Remote' (the default) this can be any address supported
+                      by Ansible.Builtin.git, TODO support other remotes https://docs.ansible.com/ansible/latest/collections/ansible/builtin/index.html
+                      When the playbook's source is 'Inline' the content of a simple
+                      playbook.yml file may be written inline.
+                    type: string
+                  source:
+                    description: Source of configuration of this playbook.
+                    enum:
+                    - Remote
+                    - Inline
                     type: string
                 required:
-                - configurableField
+                - module
+                - source
                 type: object
               providerConfigRef:
                 default:
@@ -115,13 +117,10 @@ spec:
             - forProvider
             type: object
           status:
-            description: A MyTypeStatus represents the observed state of a MyType.
+            description: A WorkspaceStatus represents the observed state of a Workspace.
             properties:
               atProvider:
-                description: MyTypeObservation are the observable fields of a MyType.
-                properties:
-                  observableField:
-                    type: string
+                description: PlaybookObservation are the observable fields of a Playbook.
                 type: object
               conditions:
                 description: Conditions of the resource.

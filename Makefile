@@ -1,9 +1,9 @@
 # ====================================================================================
 # Setup Project
-PROJECT_NAME := provider-template
+PROJECT_NAME := crossplane-provider-ansible
 PROJECT_REPO := github.com/crossplane/$(PROJECT_NAME)
 
-PLATFORMS ?= linux_amd64 linux_arm64
+PLATFORMS ?= linux_amd64
 -include build/makelib/common.mk
 
 # Setup Output

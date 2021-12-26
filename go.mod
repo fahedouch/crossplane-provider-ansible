@@ -9,7 +9,6 @@ require (
 	github.com/crossplane/provider-template v0.0.0-20211217231306-2f40be13c7b8
 	github.com/hashicorp/go-getter v1.4.0
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/afero v1.6.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	k8s.io/apimachinery v0.22.2

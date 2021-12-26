@@ -41,33 +41,33 @@ import (
 )
 
 const (
-	errNotPlaybook         = "managed resource is not a Playbook custom resource"
+	errNotPlaybookSet      = "managed resource is not a PlaybookSet custom resource"
 	errTrackPCUsage        = "cannot track ProviderConfig usage"
 	errGetPC               = "cannot get ProviderConfig"
 	errGetCreds            = "cannot get credentials"
 	errWriteGitCreds       = "cannot write .git-credentials to /tmp dir"
 	errWriteCreds          = "cannot write Playbook credentials"
-	errRemoteConfiguration = "cannot get remote Playbook configuration "
-	errWritePlaybook       = "cannot write Playbook configuration " + playbookYml
+	errRemoteConfiguration = "cannot get remote PlaybookSet configuration "
+	errWritePlaybookSet    = "cannot write PlaybookSet configuration in" + playbookYml
 	errMkdir               = "cannot make Playbook directory"
 	gitCredentialsFilename = ".git-credentials"
 )
 
 const (
-	playbookDir = "/playbooks"
-	playbookYml = "playbook.yml"
+	playbookSetDir = "/playbooks"
+	playbookYml    = "playbook.yml"
 )
 
-// Setup adds a controller that reconciles Playbook managed resources.
+// Setup adds a controller that reconciles PlaybookSet managed resources.
 func Setup(mgr ctrl.Manager, l logging.Logger, rl workqueue.RateLimiter) error {
-	name := managed.ControllerName(v1alpha1.PlaybookGroupKind)
+	name := managed.ControllerName(v1alpha1.PlaybookSetGroupKind)
 
 	o := controller.Options{
 		RateLimiter: ratelimiter.NewDefaultManagedRateLimiter(rl),
 	}
 
 	r := managed.NewReconciler(mgr,
-		resource.ManagedKind(v1alpha1.PlaybookGroupVersionKind),
+		resource.ManagedKind(v1alpha1.PlaybookSetGroupVersionKind),
 		managed.WithExternalConnecter(&connector{
 			kube: mgr.GetClient(),
 		}),
@@ -77,7 +77,7 @@ func Setup(mgr ctrl.Manager, l logging.Logger, rl workqueue.RateLimiter) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		WithOptions(o).
-		For(&v1alpha1.Playbook{}).
+		For(&v1alpha1.PlaybookSet{}).
 		Complete(r)
 }
 
@@ -95,14 +95,14 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	// can't immediately think of a clean way to decompose it without
 	// affecting readability.
 
-	cr, ok := mg.(*v1alpha1.Playbook)
+	cr, ok := mg.(*v1alpha1.PlaybookSet)
 	if !ok {
-		return nil, errors.New(errNotPlaybook)
+		return nil, errors.New(errNotPlaybookSet)
 	}
 
 	// NOTE(negz): This directory will be garbage collected by the workdir
 	// garbage collector that is started in Setup.
-	dir := filepath.Join(playbookDir, string(cr.GetUID()))
+	dir := filepath.Join(playbookSetDir, string(cr.GetUID()))
 	if err := c.fs.MkdirAll(dir, 0700); resource.Ignore(os.IsExist, err) != nil {
 		return nil, errors.Wrap(err, errMkdir)
 	}
@@ -118,7 +118,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 
 	switch cr.Spec.ForProvider.Source {
 	case v1alpha1.ConfigurationSourceRemote:
-		// NOTE(ytsarev): Retrieve .git-credentials from Spec to /tmp outside of playbook directory
+		// NOTE(ytsarev): Retrieve .git-credentials from Spec to /tmp outside of playbookSet directory
 		gitCredDir := filepath.Clean(filepath.Join("/tmp", dir))
 		if err := c.fs.MkdirAll(gitCredDir, 0700); err != nil {
 			return nil, errors.Wrap(err, errWriteGitCreds)
@@ -156,11 +156,11 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		}
 	case v1alpha1.ConfigurationSourceInline:
 		if err := c.fs.WriteFile(filepath.Join(dir, playbookYml), []byte(cr.Spec.ForProvider.Configuration), 0600); err != nil {
-			return nil, errors.Wrap(err, errWritePlaybook)
+			return nil, errors.Wrap(err, errWritePlaybookSet)
 		}
 	}
 
-	// Save creds needed for ansible playbook execution
+	// Saved credentials needed for ansible playbooks execution
 	for _, cd := range pc.Spec.Credentials {
 		data, err := resource.CommonCredentialExtractor(ctx, cd.Source, c.kube, cd.CommonCredentialSelectors)
 		if err != nil {
@@ -191,9 +191,9 @@ type external struct {
 }
 
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
-	cr, ok := mg.(*v1alpha1.Playbook)
+	cr, ok := mg.(*v1alpha1.PlaybookSet)
 	if !ok {
-		return managed.ExternalObservation{}, errors.New(errNotPlaybook)
+		return managed.ExternalObservation{}, errors.New(errNotPlaybookSet)
 	}
 
 	// These fmt statements should be removed in the real implementation.
@@ -217,9 +217,9 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 }
 
 func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*v1alpha1.Playbook)
+	cr, ok := mg.(*v1alpha1.PlaybookSet)
 	if !ok {
-		return managed.ExternalCreation{}, errors.New(errNotPlaybook)
+		return managed.ExternalCreation{}, errors.New(errNotPlaybookSet)
 	}
 
 	fmt.Printf("Creating: %+v", cr)
@@ -232,9 +232,9 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
-	cr, ok := mg.(*v1alpha1.Playbook)
+	cr, ok := mg.(*v1alpha1.PlaybookSet)
 	if !ok {
-		return managed.ExternalUpdate{}, errors.New(errNotPlaybook)
+		return managed.ExternalUpdate{}, errors.New(errNotPlaybookSet)
 	}
 
 	fmt.Printf("Updating: %+v", cr)
@@ -247,9 +247,9 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
-	cr, ok := mg.(*v1alpha1.Playbook)
+	cr, ok := mg.(*v1alpha1.PlaybookSet)
 	if !ok {
-		return errors.New(errNotPlaybook)
+		return errors.New(errNotPlaybookSet)
 	}
 
 	fmt.Printf("Deleting: %+v", cr)

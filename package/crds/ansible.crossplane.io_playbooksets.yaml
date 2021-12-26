@@ -6,16 +6,14 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.6.2
   creationTimestamp: null
-  name: playbooks.ansible.crossplane.io
+  name: playbooksets.ansible.crossplane.io
 spec:
   group: ansible.crossplane.io
   names:
-    categories:
-    - ansible
-    kind: Playbook
-    listKind: PlaybookList
-    plural: playbooks
-    singular: playbook
+    kind: PlaybookSet
+    listKind: PlaybookSetList
+    plural: playbooksets
+    singular: playbookset
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -25,7 +23,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: A Playbook of Ansible Configuration.
+        description: PlaybookSet represents a set of Ansible Playbooks.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -40,7 +38,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: A PlaybookSpec defines the desired state of a Playbook.
+            description: A PlaybookSetSpec defines the desired state of a PlaybookSet.
             properties:
               deletionPolicy:
                 default: Delete
@@ -52,18 +50,19 @@ spec:
                 - Delete
                 type: string
               forProvider:
-                description: PlaybookParameters are the configurable fields of a Playbook.
+                description: PlaybookSetParameters are the configurable fields of
+                  a PlaybookSet.
                 properties:
                   module:
-                    description: The configuration of this playbook; i.e. the configuration
-                      containing its playbook.yml file. When the playbook's ProviderCredentialssource
-                      is 'Remote' (the default) this can be any address supported
+                    description: The configuration of this PlaybookSet; i.e. the configuration
+                      containing its playbook files. When the playbookSet's Provider
+                      source is 'Remote' (the default) this can be any address supported
                       by Ansible.Builtin.git, TODO support other remotes https://docs.ansible.com/ansible/latest/collections/ansible/builtin/index.html
-                      When the playbook's source is 'Inline' the content of a simple
+                      When the playbookSet's source is 'Inline' the content of a simple
                       playbook.yml file may be written inline.
                     type: string
                   source:
-                    description: Source of configuration of this playbook.
+                    description: Source of configuration of this playbookSet.
                     enum:
                     - Remote
                     - Inline
@@ -117,10 +116,11 @@ spec:
             - forProvider
             type: object
           status:
-            description: A WorkspaceStatus represents the observed state of a Workspace.
+            description: A PlaybookSetStatus represents the observed state of a PlaybookSet.
             properties:
               atProvider:
-                description: PlaybookObservation are the observable fields of a Playbook.
+                description: PlaybookSetObservation are the observable fields of a
+                  PlaybookSet.
                 type: object
               conditions:
                 description: Conditions of the resource.

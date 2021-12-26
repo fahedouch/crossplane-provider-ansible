@@ -37,12 +37,12 @@ var (
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
 )
 
-// Playbook type metadata.
+// PlaybookSet type metadata.
 var (
-	PlaybookKind             = reflect.TypeOf(Playbook{}).Name()
-	PlaybookGroupKind        = schema.GroupKind{Group: Group, Kind: PlaybookKind}.String()
-	PlaybookKindAPIVersion   = PlaybookKind + "." + SchemeGroupVersion.String()
-	PlaybookGroupVersionKind = SchemeGroupVersion.WithKind(PlaybookKind)
+	PlaybookSetKind             = reflect.TypeOf(PlaybookSet{}).Name()
+	PlaybookSetGroupKind        = schema.GroupKind{Group: Group, Kind: PlaybookSetKind}.String()
+	PlaybookSetKindAPIVersion   = PlaybookSetKind + "." + SchemeGroupVersion.String()
+	PlaybookSetGroupVersionKind = SchemeGroupVersion.WithKind(PlaybookSetKind)
 )
 
 // ProviderConfig type metadata.
@@ -67,7 +67,7 @@ var (
 )
 
 func init() {
-	SchemeBuilder.Register(&Playbook{}, &PlaybookList{})
+	SchemeBuilder.Register(&PlaybookSet{}, &PlaybookSetList{})
 	SchemeBuilder.Register(&ProviderConfig{}, &ProviderConfigList{})
 	SchemeBuilder.Register(&ProviderConfigUsage{}, &ProviderConfigUsageList{})
 }

@@ -22,7 +22,7 @@ import (
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
-// A ConfigurationSource represents the source of a Playbook Configuration.
+// A ConfigurationSource represents the source of a PlaybookSet Configuration.
 // +kubebuilder:validation:Enum=Remote;Inline
 type ConfigurationSource string
 
@@ -32,56 +32,56 @@ const (
 	ConfigurationSourceInline ConfigurationSource = "Inline"
 )
 
-// PlaybookParameters are the configurable fields of a Playbook.
-type PlaybookParameters struct {
-	// The configuration of this playbook; i.e. the configuration containing its playbook.yml
-	// file. When the playbook's ProviderCredentialssource is 'Remote' (the default) this can be
+// PlaybookSetParameters are the configurable fields of a PlaybookSet.
+type PlaybookSetParameters struct {
+	// The configuration of this PlaybookSet; i.e. the configuration containing its playbook
+	// files. When the playbookSet's Provider source is 'Remote' (the default) this can be
 	// any address supported by Ansible.Builtin.git,
 	// TODO support other remotes https://docs.ansible.com/ansible/latest/collections/ansible/builtin/index.html
-	// When the playbook's source is 'Inline' the
+	// When the playbookSet's source is 'Inline' the
 	// content of a simple playbook.yml file may be written inline.
 	Configuration string `json:"module"`
 
-	// Source of configuration of this playbook.
+	// Source of configuration of this playbookSet.
 	Source ConfigurationSource `json:"source"`
 }
 
-// PlaybookObservation are the observable fields of a Playbook.
-type PlaybookObservation struct {
+// PlaybookSetObservation are the observable fields of a PlaybookSet.
+type PlaybookSetObservation struct {
 	// TODO(negz): Should we include outputs here? Or only in connection
 	// details.
 }
 
-// A PlaybookSpec defines the desired state of a Playbook.
-type PlaybookSpec struct {
+// A PlaybookSetSpec defines the desired state of a PlaybookSet.
+type PlaybookSetSpec struct {
 	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       PlaybookParameters `json:"forProvider"`
+	ForProvider       PlaybookSetParameters `json:"forProvider"`
 }
 
-// A PlaybookStatus represents the observed state of a Workspace.
-type PlaybookStatus struct {
+// A PlaybookSetStatus represents the observed state of a PlaybookSet.
+type PlaybookSetStatus struct {
 	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          PlaybookObservation `json:"atProvider,omitempty"`
+	AtProvider          PlaybookSetObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// A Playbook of Ansible Configuration.
+// PlaybookSet represents a set of Ansible Playbooks.
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
-type Playbook struct {
+type PlaybookSet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   PlaybookSpec   `json:"spec"`
-	Status PlaybookStatus `json:"status,omitempty"`
+	Spec   PlaybookSetSpec   `json:"spec"`
+	Status PlaybookSetStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// PlaybookList contains a list of Playbook
-type PlaybookList struct {
+// PlaybookSetList is a collection of PlaybookSet.
+type PlaybookSetList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Playbook `json:"items"`
+	Items           []PlaybookSet `json:"items"`
 }
